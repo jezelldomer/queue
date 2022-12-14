@@ -1,69 +1,86 @@
-
 from collections import deque
+from dataclasses import dataclass
+from heapq import heapify, heappop, heappush
+from itertools import count
+from typing import Any
 
-class Queue:
-    def __init__(self):
-        self._elements = deque()
+#from queues import Queue, Stack, PriorityQueue
+
+#fifo, stack, heap = Queue(), Stack(), PriorityQueue()
+#for priority, element in enumerate(["1st", "2nd", "3rd"]):
+#    fifo.enqueue(element)
+#    stack.enqueue(element)
+#    heap.enqueue_with_priority(priority, element)
+
+#for elements in zip(fifo, stack, heap):
+#    print(elements)
+
+#('1st', '3rd', '3rd')
+#('2nd', '2nd', '2nd')
+#('3rd', '1st', '1st')
+
+class IterableMixin:
+    def __len__(self):
+        return len(self._elements)
+
+    def __iter__(self):
+        while len(self) > 0:
+            yield self.dequeue()
+
+
+class Queue(IterableMixin):
+    def __init__(self, *elements):
+        self._elements = deque(elements)
 
     def enqueue(self, element):
         self._elements.append(element)
 
     def dequeue(self):
         return self._elements.popleft()
-        
-fifo = Queue()
-fifo.enqueue("1st")
-fifo.enqueue("2nd")
-fifo.enqueue("3rd")
-
-print(fifo.dequeue())
-
-print(fifo.dequeue())
-
-print(fifo.dequeue())
-
-print("\n--___•___--___•___--___•___--___•___--___•___--\n")
-
-#now trying lifo instead of fifo          
-lifo = []
-
-lifo.append("1st")
-lifo.append("2nd")
-lifo.append("3rd")
-
-print(lifo.pop())
-
-print(lifo.pop())
-
-print(lifo.pop())
 
 
+class Stack(Queue):
+    def dequeue(self):
+        return self._elements.pop()
 
-print("\n--___•___--___•___--___•___--___•___--___•___--\n")
 
-#priority queue using heap
-from collections import deque
-from heapq import heappop, heappush
-
-class PriorityQueue:
+class PriorityQueue(IterableMixin):
     def __init__(self):
         self._elements = []
+        self._counter = count()
 
     def enqueue_with_priority(self, priority, value):
-        heappush(self._elements, (priority, value))
+        element = (-priority, next(self._counter), value)
+        heappush(self._elements, element)
 
     def dequeue(self):
-        return heappop(self._elements)
-        
+        return heappop(self._elements)[-1]
 
-CRITICAL = 3
-IMPORTANT = 2
-NEUTRAL = 1
 
-messages = PriorityQueue()
-messages.enqueue_with_priority(IMPORTANT, "Windshield wipers turned on")
-messages.enqueue_with_priority(NEUTRAL, "Radio station tuned in")
-messages.enqueue_with_priority(CRITICAL, "Brake pedal depressed")
-messages.enqueue_with_priority(IMPORTANT, "Hazard lights turned on")
+@dataclass(order=True)
+class Element:
+    priority: float
+    count: int
+    value: Any
 
-print(messages.dequeue())        
+class MutableMinHeap(IterableMixin):
+    def __init__(self):
+        super().__init__()
+        self._elements_by_value = {}
+        self._elements = []
+        self._counter = count()
+
+    def __setitem__(self, unique_value, priority):
+        if unique_value in self._elements_by_value:
+            self._elements_by_value[unique_value].priority = priority
+            heapify(self._elements)
+        else:
+            element = Element(priority, next(self._counter), unique_value)
+            self._elements_by_value[unique_value] = element
+            heappush(self._elements, element)
+
+    def __getitem__(self, unique_value):
+        return self._elements_by_value[unique_value].priority
+
+    def dequeue(self):
+        return heappop(self._elements).value
