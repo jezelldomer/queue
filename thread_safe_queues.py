@@ -25,9 +25,7 @@ def main(args):
     for consumer in consumers:
         consumer.start()
 
-    view = View(buffer, producers, consumers)
-    view.animate()
-
+    
     def parse_args():
         parser = argparse.ArgumentParser()
         parser.add_argument("-q", "--queue", choices=QUEUE_TYPES, default="fifo")
@@ -117,4 +115,27 @@ def main(args):
                 self.product = self.buffer.get()
                 self.simulate_work()
                 self.buffer.task_done()
-                self.simulate_idle()                                        
+                self.simulate_idle()
+                
+#priority queue    
+from dataclasses import dataclass, field
+from enum import IntEnum
+            
+@dataclass(order=True)
+class Product:
+    priority: int
+    label: str = field(compare=False)
+
+    def __str__(self):
+        return self.label
+
+class Priority(IntEnum):
+    HIGH = 1
+    MEDIUM = 2
+    LOW = 3
+
+PRIORITIZED_PRODUCTS = (
+    Product(Priority.HIGH, ":1st_place_medal:"),
+    Product(Priority.MEDIUM, ":2nd_place_medal:"),
+    Product(Priority.LOW, ":3rd_place_medal:"),
+)                                                  
