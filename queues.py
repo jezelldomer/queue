@@ -1,9 +1,12 @@
+# queues.py
+
 from collections import deque
 from dataclasses import dataclass
 from heapq import heapify, heappop, heappush
 from itertools import count
 from typing import Any
 
+#Remove the # start from below until print(elements) to run the program
 #from queues import Queue, Stack, PriorityQueue
 
 #fifo, stack, heap = Queue(), Stack(), PriorityQueue()
@@ -15,9 +18,9 @@ from typing import Any
 #for elements in zip(fifo, stack, heap):
 #    print(elements)
 
-#('1st', '3rd', '3rd')
-#('2nd', '2nd', '2nd')
-#('3rd', '1st', '1st')
+('1st', '3rd', '3rd')
+('2nd', '2nd', '2nd')
+('3rd', '1st', '1st')
 
 class IterableMixin:
     def __len__(self):
@@ -62,6 +65,7 @@ class Element:
     priority: float
     count: int
     value: Any
+
 
 class MutableMinHeap(IterableMixin):
     def __init__(self):
